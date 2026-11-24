@@ -69,13 +69,25 @@ theorem abundanceFactorStrictGrowth (p a : Nat) (hp : 2 ≤ p) :
     | succ k => simp only [Nat.succ_sub_one, Nat.mul_succ]
   omega
 
-theorem sigma_prime_power_exceeds_self (p a : Nat) (hp : 2 ≤ p) :
-    p ^ a < sigmaPrimePower p a := by
-  have h_closed := sigma_prime_power_closed_form p a hp
-  have h_growth := abundanceFactorStrictGrowth p a hp
-  have h_comm : (p - 1) * p ^ a < (p - 1) * sigmaPrimePower p a := by
-    rw [Nat.mul_comm (p - 1) (p ^ a)]
+theorem sigma_prime_power_closed_form (p a : Nat) (hp : 2 ≤ p) :
+    (p - 1) * sigmaPrimePower p a = p ^ (a + 1) - 1 := by
+  induction a with
+  | zero =>
+    simp only [sigmaPrimePower, Nat.mul_one, Nat.zero_add, Nat.pow_one]
+  | succ k ih =>
+    dsimp only [sigmaPrimePower]
+    rw [Nat.mul_add, ih]
+    have h_pow_pos : 1 ≤ p ^ (k + 1) := pure_one_le_pow (k + 1) p (by omega)
+    have h_tele : (p - 1) * p ^ (k + 1) + p ^ (k + 1) = p * p ^ (k + 1) :=
+      sub_one_mul_add_self p (p ^ (k + 1)) (by omega)
+    have h_idx : k + 1 + 1 = k + 2 := by omega
+    have h_pow_succ : p ^ (k + 2) = p * p ^ (k + 1) := by
+      rw [← h_idx, Nat.pow_succ, Nat.mul_comm]
+    have h_pow_le : p ^ (k + 1) ≤ p ^ (k + 2) := by
+      have : 1 * p ^ (k + 1) ≤ p * p ^ (k + 1) := Nat.mul_le_mul_right _ (by omega)
+      omega
     omega
+
   exact Nat.lt_of_mul_lt_mul_left h_comm
 
 def wheelValue : List (Nat × Nat) → Nat
