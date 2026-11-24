@@ -91,9 +91,15 @@ theorem sigma_prime_power_closed_form (p a : Nat) (hp : 2 ≤ p) :
     rw [h_re, Nat.sub_add_cancel h_pow_pos]
     omega
 
+theorem sigma_prime_power_exceeds_self (p a : Nat) (hp : 2 ≤ p) :
+    p ^ a < sigmaPrimePower p a := by
+  have h_closed := sigma_prime_power_closed_form p a hp
+  have h_growth := abundanceFactorStrictGrowth p a hp
+  have h_comm : (p - 1) * p ^ a < (p - 1) * sigmaPrimePower p a := by
+    rw [Nat.mul_comm (p - 1) (p ^ a)]
+    omega
 
-
-  exact Nat.lt_of_mul_lt_mul_left h_comm
+ exact Nat.lt_of_mul_lt_mul_left h_comm
 
 def wheelValue : List (Nat × Nat) → Nat
   | [] => 1
