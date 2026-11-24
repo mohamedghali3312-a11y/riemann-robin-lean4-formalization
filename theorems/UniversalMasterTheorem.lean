@@ -233,9 +233,27 @@ theorem universalQuotientMasterTheoremForAllN
       wheelSigma W * wheelValue ((q, b) :: W) < wheelSigma ((q, b) :: W) * wheelValue W) ∧
     (¬ SatisfiesRobinThreshold wheel5040 3817 1000 ∧
        SatisfiesRobinThreshold wheel10080 3952 1000) := by
-  refine ⟨?_, ?_, ?_, ?_⟩
+    refine ⟨?_, ?_, ?_, ⟨?_, ?_⟩⟩
+
   · intro n hn
     refine ⟨?_, ?_⟩
     · by_cases hes : IsErdosStrausCriticalResidue n
       · exact Or.inr hes
       · exact Or.inl (h_es_base n hn hes)
+    · by_cases hcol : IsCollatzCriticalResidue32 n
+      · exact Or.inr hcol
+      · exact Or.inl (h_col_base n (by omega) hcol)
+  · intro p a hp
+    exact sigma_prime_power_closed_form p a hp
+  · intro q b W hq hW
+    exact robin_general_wheel_step_increase q b W hq hW
+  · exact robin_5040_is_counterexample
+  · exact robin_10080_satisfies_robin
+
+#print axioms sigma_prime_power_closed_form
+#print axioms robin_general_wheel_step_increase
+#print axioms robin_5040_is_counterexample
+#print axioms robin_10080_satisfies_robin
+#print axioms rawSigma_eq_wheelSigma
+#print axioms general_spectral_regularization_bound
+#print axioms universalQuotientMasterTheoremForAllN
