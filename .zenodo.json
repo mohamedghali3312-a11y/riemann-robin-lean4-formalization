@@ -1,0 +1,23 @@
+{
+  "title": "Universal Quotient Master Theorem (for all n >= 7): Pure Lean 4 Formalization and AI-Assisted Proof Synthesis",
+  "upload_type": "software",
+  "description": "Modular, zero-dependency Pure Lean 4 formalization unifying seven open problems in number theory (Riemann/Guy Robin weighted wheels, Erdos-Straus, Collatz 3x+d, Sierpinski, Lehmer totient, Wieferich/Wall-Sun-Sun, and Sendov) with conditional Mathlib spectral-arithmetic bridges. Directed by Mohamed Ghali with AI-assisted proof synthesis and kernel verification (zero sorryAx).",
+  "creators": [
+    {
+      "name": "Ghali, Mohamed",
+      "orcid": "0009-0006-3364-5341"
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "Lean 4",
+    "Formal Verification",
+    "Riemann Hypothesis",
+    "Guy Robin Criterion",
+    "Number Theory",
+    "AI-Assisted Mathematics",
+    "Erdos-Straus Conjecture",
+    "Collatz Conjecture",
+    "Wieferich Primes"
+  ]
+}
