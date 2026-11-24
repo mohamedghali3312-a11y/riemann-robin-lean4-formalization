@@ -98,8 +98,7 @@ theorem sigma_prime_power_exceeds_self (p a : Nat) (hp : 2 ≤ p) :
   have h_comm : (p - 1) * p ^ a < (p - 1) * sigmaPrimePower p a := by
     rw [Nat.mul_comm (p - 1) (p ^ a)]
     omega
-
- exact Nat.lt_of_mul_lt_mul_left h_comm
+  exact Nat.lt_of_mul_lt_mul_left h_comm
 
 def wheelValue : List (Nat × Nat) → Nat
   | [] => 1
