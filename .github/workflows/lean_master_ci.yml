@@ -1,0 +1,58 @@
+name: Universal Master Theorem CI (Pure Lean 4 & Axiom Audit)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  pure-lean4-kernel:
+    name: Pure Lean 4 Kernel Verification & Axiom Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate modular Robin weighted wheels (if script exists)
+        run: |
+          if [ -f "scripts/generate_master_lean.py" ]; then
+            python3 scripts/generate_master_lean.py
+          fi
+
+      - name: Install Elan & Pure Lean 4 (v4.14.0)
+        run: |
+          curl https://githubusercontent.com -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+
+      - name: Verify Lean 4 version
+        run: lean --version
+
+      - name: Verify all Pure Lean 4 modules & audit axioms
+        run: |
+          set -e
+          for f in theorems/*.lean; do
+            echo "===================================================="
+            echo "Verifying Pure Lean 4 module: $f"
+            echo "===================================================="
+            OUTPUT=$(lean "$f" 2>&1)
+            echo "$OUTPUT"
+
+            if echo "$OUTPUT" | grep -q "sorryAx"; then
+              echo "ERROR: 'sorryAx' detected in $f!"
+              exit 1
+            fi
+
+            if echo "$OUTPUT" | grep -E "depends on axioms:" | grep -vqE "^'.*' depends on axioms: \[(propext|Quot\.sound|Classical\.choice|, )+\]$"; then
+              echo "ERROR: Non-standard axiom detected in $f!"
+              exit 1
+            fi
+          done
+          echo "All Pure Lean 4 modules passed with zero sorryAx!"
