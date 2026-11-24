@@ -30,13 +30,16 @@ jobs:
       - name: Install Elan & Pure Lean 4 (v4.14.0)
         run: |
           curl https://githubusercontent.com -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.14.0
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+          echo "${HOME}/.elan/bin" >> "${GITHUB_PATH}"
 
       - name: Verify Lean 4 version
-        run: lean --version
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lean --version
 
       - name: Verify all Pure Lean 4 modules & audit axioms
         run: |
+          export PATH="$HOME/.elan/bin:$PATH"
           set -e
           for f in theorems/*.lean; do
             echo "===================================================="
