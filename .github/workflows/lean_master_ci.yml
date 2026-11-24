@@ -16,6 +16,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Lean 4 Toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          build: false
+
       - name: Set up Python 3
         uses: actions/setup-python@v5
         with:
@@ -26,13 +31,6 @@ jobs:
           if [ -f "scripts/generate_master_lean.py" ]; then
             python3 scripts/generate_master_lean.py
           fi
-
-      - name: Install Elan & Lean 4 (v4.14.0)
-        run: |
-          curl -fL "https://github.com" -o elan.tar.gz
-          tar -xzf elan.tar.gz
-          ./elan-init -y --default-toolchain leanprover/lean4:v4.14.0
-          echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
       - name: Verify Lean 4 version
         run: lean --version
