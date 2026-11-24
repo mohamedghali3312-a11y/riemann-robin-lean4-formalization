@@ -22,7 +22,9 @@ theorem lehmerNoOddSemiprime (p q : Nat) (hp : 3 ≤ p) (hq : p + 2 ≤ q) :
     | zero =>
       simp only [Nat.mul_one] at hk
       omega
+    
     | succ k'' =>
-      have h_ge2 : (p - 1) * (q - 1) * 2 ≤ (p - 1) * (q - 1) * (k'' + 2) :=
-        Nat.mul_le_mul_left _ (by omega)
+      have h_ge2 : (p - 1) * (q - 1) * (k'' + 1 + 1) =
+                   (p - 1) * (q - 1) * k'' + ((p - 1) * (q - 1) + (p - 1) * (q - 1)) := by
+        rw [Nat.mul_add, Nat.mul_add, Nat.mul_one, Nat.add_assoc]
       omega
