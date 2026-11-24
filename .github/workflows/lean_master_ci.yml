@@ -19,8 +19,8 @@ jobs:
       - name: Set up Lean 4 Toolchain
         uses: leanprover/lean-action@v1
         with:
+          auto-config: false
           build: false
-          lake-manifest: false
 
       - name: Set up Python 3
         uses: actions/setup-python@v5
