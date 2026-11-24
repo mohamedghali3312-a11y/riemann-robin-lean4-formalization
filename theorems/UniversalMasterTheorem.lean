@@ -83,10 +83,14 @@ theorem sigma_prime_power_closed_form (p a : Nat) (hp : 2 ≤ p) :
     have h_idx : k + 1 + 1 = k + 2 := by omega
     have h_pow_succ : p ^ (k + 2) = p * p ^ (k + 1) := by
       rw [← h_idx, Nat.pow_succ, Nat.mul_comm]
-    calc (p ^ (k + 1) - 1) + (p - 1) * p ^ (k + 1)
-        = (p - 1) * p ^ (k + 1) + (p ^ (k + 1) - 1) := Nat.add_comm _ _
-      _ = ((p - 1) * p ^ (k + 1) + p ^ (k + 1)) - 1 := (Nat.add_sub_assoc h_pow_pos _).symm
-      _ = p ^ (k + 2) - 1 := by rw [h_tele, ← h_pow_succ]
+    have h_pow2_pos : 1 ≤ p ^ (k + 2) := pure_one_le_pow (k + 2) p (by omega)
+    apply Nat.add_right_cancel (m := 1)
+    rw [Nat.sub_add_cancel h_pow2_pos]
+    have h_re : (p ^ (k + 1) - 1) + (p - 1) * p ^ (k + 1) + 1 =
+                ((p ^ (k + 1) - 1) + 1) + (p - 1) * p ^ (k + 1) := by ac_rfl
+    rw [h_re, Nat.sub_add_cancel h_pow_pos]
+    omega
+
 
 
   exact Nat.lt_of_mul_lt_mul_left h_comm
