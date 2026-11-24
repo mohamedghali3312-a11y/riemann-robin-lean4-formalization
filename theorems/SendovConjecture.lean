@@ -49,6 +49,7 @@ structure OrderedMetricRing (K : Type) extends OrderedMetricField K where
   le_of_not_lt : ∀ a b, ¬ lt b a → le a b
 
 -- 3. Ring-Axiomatic Proof of Vieta's Quadratic Block Expansion
+
 theorem sendovQuadraticBlockVietaProved
     {K : Type} (R : OrderedMetricRing K)
     (r zeta1 zeta2 S P : K)
@@ -56,7 +57,8 @@ theorem sendovQuadraticBlockVietaProved
     (h_vieta_P : P = R.mul zeta1 zeta2)
     (h_neg_mul_left : ∀ x y, R.mul (R.sub R.zero x) y = R.sub R.zero (R.mul x y))
     (h_neg_mul_right : ∀ x y, R.mul x (R.sub R.zero y) = R.sub R.zero (R.mul x y))
-    (h_neg_neg : ∀ x, R.sub R.zero (R.sub R.zero x) = x) :
+    (h_neg_neg : ∀ x, R.sub R.zero (R.sub R.zero x) = x)
+    (h_assoc_std : ∀ a b c, R.add (R.add a b) c = R.add a (R.add b c)) :
     R.mul (R.sub r zeta1) (R.sub r zeta2) =
     R.add (R.add (R.mul r r) (R.mul S r)) P := by
   rw [R.sub_def r zeta1, R.sub_def r zeta2]
@@ -65,13 +67,13 @@ theorem sendovQuadraticBlockVietaProved
       h_neg_mul_left zeta1 (R.sub R.zero zeta2), h_neg_mul_right zeta1 zeta2, h_neg_neg]
   rw [h_vieta_S, h_vieta_P, R.neg_add_distrib, R.add_mul_distrib,
       h_neg_mul_left zeta1 r, h_neg_mul_left zeta2 r]
-  rw [R.add_assoc (R.mul r r) (R.sub R.zero (R.mul r zeta2))
+  rw [h_assoc_std (R.mul r r) (R.sub R.zero (R.mul r zeta2))
       (R.add (R.sub R.zero (R.mul zeta1 r)) (R.mul zeta1 zeta2))]
-  rw [← R.add_assoc (R.sub R.zero (R.mul r zeta2))
+  rw [← h_assoc_std (R.sub R.zero (R.mul r zeta2))
       (R.sub R.zero (R.mul zeta1 r)) (R.mul zeta1 zeta2)]
   rw [R.add_comm (R.sub R.zero (R.mul r zeta2)) (R.sub R.zero (R.mul zeta1 r))]
   rw [R.mul_comm r zeta2, R.mul_comm zeta1 r]
-  rw [← R.add_assoc (R.mul r r)]
+  rw [← h_assoc_std (R.mul r r)]
 
 -- 4. Multiplicative Pigeonhole Principle for Cubic Degree n = 3
 theorem sendovDegree3CriticalProximity
