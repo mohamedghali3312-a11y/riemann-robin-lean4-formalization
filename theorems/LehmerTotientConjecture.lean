@@ -13,16 +13,16 @@ theorem lehmerNoOddSemiprime (p q : Nat) (hp : 3 ≤ p) (hq : p + 2 ≤ q) :
     have hq1 : 4 ≤ q - 1 := by omega
     have h_mul : 2 * (q - 1) ≤ (p - 1) * (q - 1) := Nat.mul_le_mul_right (q - 1) hp1
     omega
+
   cases k with
   | zero =>
-    simp only [Nat.mul_zero] at hk
+    rw [Nat.mul_zero] at hk
     omega
   | succ k' =>
     cases k' with
     | zero =>
-      simp only [Nat.mul_one] at hk
+      rw [Nat.zero_add, Nat.mul_one] at hk
       omega
-    
     | succ k'' =>
       have h_ge2 : (p - 1) * (q - 1) * (k'' + 1 + 1) =
                    (p - 1) * (q - 1) * k'' + ((p - 1) * (q - 1) + (p - 1) * (q - 1)) := by
