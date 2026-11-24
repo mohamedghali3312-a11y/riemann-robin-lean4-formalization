@@ -5,6 +5,14 @@
 -- Author: Mohamed Ghali (ORCID: 0009-0006-3364-5341)
 -- ============================================================================
 
+-- Helper 100% Pure Lean 4 : 1 ≤ p ^ a dès que 1 ≤ p
+theorem pure_one_le_pow (a p : Nat) (hp : 1 ≤ p) : 1 ≤ p ^ a := by
+  induction a with
+  | zero => simp only [Nat.pow_zero, Nat.le_refl]
+  | succ k ih =>
+    rw [Nat.pow_succ]
+    exact Nat.mul_pos ih hp
+
 -- ----------------------------------------------------------------------------
 -- 1. ERDŐS–STRAUS & COLLATZ DEFINITIONS
 -- ----------------------------------------------------------------------------
@@ -50,7 +58,7 @@ theorem sigma_prime_power_closed_form (p a : Nat) (hp : 2 ≤ p) :
   | succ k ih =>
     dsimp only [sigmaPrimePower]
     rw [Nat.mul_add, ih]
-    have h_pow_pos : 1 ≤ p ^ (k + 1) := Nat.one_le_pow (k + 1) p (by omega)
+    have h_pow_pos : 1 ≤ p ^ (k + 1) := pure_one_le_pow (k + 1) p (by omega)
     have h_tele : (p - 1) * p ^ (k + 1) + p ^ (k + 1) = p * p ^ (k + 1) :=
       sub_one_mul_add_self p (p ^ (k + 1)) (by omega)
     have h_pow_succ : p ^ (k + 2) = p * p ^ (k + 1) := by
@@ -59,7 +67,7 @@ theorem sigma_prime_power_closed_form (p a : Nat) (hp : 2 ≤ p) :
 
 theorem abundanceFactorStrictGrowth (p a : Nat) (hp : 2 ≤ p) :
     p ^ a * (p - 1) < p ^ (a + 1) - 1 := by
-  have h_pow_pos : 1 ≤ p ^ a := Nat.one_le_pow a p (by omega)
+  have h_pow_pos : 1 ≤ p ^ a := pure_one_le_pow a p (by omega)
   have h_expand : p ^ (a + 1) = p ^ a * p := Nat.pow_succ p a
   have h_mul : p ^ a * (p - 1) + p ^ a = p ^ a * p := by
     cases p with
@@ -79,7 +87,7 @@ theorem sigma_prime_power_exceeds_self (p a : Nat) (hp : 2 ≤ p) :
 -- ----------------------------------------------------------------------------
 -- 3. ARBITRARY ROBIN WEIGHTED WHEELS & PHASE TRANSITION (BRICKS 3 & 4)
 -- ----------------------------------------------------------------------------
-theorem robinWeightedWheelDiv (V1 V2 k : Nat) (h_div : V2 = k * V1) (hk : 1 ≤ k) :
+theorem robinWeightedWheelDiv (V1 V2 k : Nat) (h_div : V2 = k * V1) :
     V1 ∣ V2 := ⟨k, by rw [h_div, Nat.mul_comm]⟩
 
 def wheelValue : List (Nat × Nat) → Nat
@@ -104,9 +112,9 @@ theorem wheel_pos (W : List (Nat × Nat)) (hW : ValidWheel W) :
     rcases hW with ⟨hp, hrest⟩
     rcases ih hrest with ⟨hv_pos, hs_pos⟩
     dsimp only [wheelValue, wheelSigma]
-    have hpa_pos : 1 ≤ p ^ a := Nat.one_le_pow a p (by omega)
+    have hpa_pos : 1 ≤ p ^ a := pure_one_le_pow a p (by omega)
     have hsp_gt := sigma_prime_power_exceeds_self p a hp
-    exact ⟨Nat.mul_pos (by omega) hv_pos, Nat.mul_pos (by omega) hs_pos⟩
+    exact ⟨Nat.mul_pos hpa_pos hv_pos, Nat.mul_pos (by omega) hs_pos⟩
 
 theorem robin_general_wheel_step_increase
     (q b : Nat) (W : List (Nat × Nat))
@@ -117,11 +125,11 @@ theorem robin_general_wheel_step_increase
   have hq_gt := sigma_prime_power_exceeds_self q b hq
   rcases wheel_pos W hW with ⟨hv_pos, hs_pos⟩
   have h_step1 : wheelSigma W * q ^ b < wheelSigma W * sigmaPrimePower q b :=
-    Nat.mul_lt_mul_of_pos_left hq_gt (by omega)
+    Nat.mul_lt_mul_of_pos_left hq_gt hs_pos
   have h_step2 :
       (wheelSigma W * q ^ b) * wheelValue W <
       (wheelSigma W * sigmaPrimePower q b) * wheelValue W :=
-    Nat.mul_lt_mul_of_pos_right h_step1 (by omega)
+    Nat.mul_lt_mul_of_pos_right h_step1 hv_pos
   have h_rearrange_lhs :
       wheelSigma W * (q ^ b * wheelValue W) =
       (wheelSigma W * q ^ b) * wheelValue W := by ac_rfl
@@ -134,7 +142,7 @@ theorem robin_general_wheel_step_increase
 def wheel5040 : List (Nat × Nat) := [(2, 4), (3, 2), (5, 1), (7, 1)]
 def wheel10080 : List (Nat × Nat) := [(2, 5), (3, 2), (5, 1), (7, 1)]
 
-def SatisfiesRobinThreshold (W : List (Nat × Nat)) (c_num c_den : Nat) : Prop :=
+abbrev SatisfiesRobinThreshold (W : List (Nat × Nat)) (c_num c_den : Nat) : Prop :=
   wheelSigma W * c_den < wheelValue W * c_num
 
 theorem robin_5040_is_counterexample :
@@ -154,13 +162,16 @@ def rawSigma (n : Nat) : Nat :=
 def IsPurePrime (p : Nat) : Prop :=
   2 ≤ p ∧ ∀ d : Nat, 1 ≤ d → d ≤ p → p % d = 0 → d = 1 ∨ d = p
 
+def IsPureCoprime (a b : Nat) : Prop :=
+  Nat.gcd a b = 1
+
 def ValidPrimeWheel : List (Nat × Nat) → Prop
   | [] => True
   | (p, a) :: rest =>
-    IsPurePrime p ∧ Nat.Coprime (p ^ a) (wheelValue rest) ∧ ValidPrimeWheel rest
+    IsPurePrime p ∧ IsPureCoprime (p ^ a) (wheelValue rest) ∧ ValidPrimeWheel rest
 
 theorem rawSigma_eq_wheelSigma
-    (h_coprime_mul : ∀ A B : Nat, 1 ≤ A → 1 ≤ B → Nat.Coprime A B →
+    (h_coprime_mul : ∀ A B : Nat, 1 ≤ A → 1 ≤ B → IsPureCoprime A B →
       rawSigma (A * B) = rawSigma A * rawSigma B)
     (h_prime_pow : ∀ p a : Nat, IsPurePrime p →
       rawSigma (p ^ a) = sigmaPrimePower p a)
@@ -175,7 +186,7 @@ theorem rawSigma_eq_wheelSigma
     dsimp only [ValidPrimeWheel] at hW
     rcases hW with ⟨hp_prime, h_cop, hrest⟩
     dsimp only [wheelValue, wheelSigma]
-    have hpa_pos : 1 ≤ p ^ a := Nat.one_le_pow a p (by have := hp_prime.1; omega)
+    have hpa_pos : 1 ≤ p ^ a := pure_one_le_pow a p (by have := hp_prime.1; omega)
     have hrest_pos : 1 ≤ wheelValue rest := by
       clear ih h_cop
       induction rest with
@@ -184,7 +195,7 @@ theorem rawSigma_eq_wheelSigma
         rcases hd2 with ⟨q, b⟩
         dsimp only [ValidPrimeWheel] at hrest
         dsimp only [wheelValue]
-        have hqb : 1 ≤ q ^ b := Nat.one_le_pow b q (by have := hrest.1.1; omega)
+        have hqb : 1 ≤ q ^ b := pure_one_le_pow b q (by have := hrest.1.1; omega)
         exact Nat.mul_pos hqb (ihr2 hrest.2.2)
     rw [h_coprime_mul (p ^ a) (wheelValue rest) hpa_pos hrest_pos h_cop]
     rw [h_prime_pow p a hp_prime, ih hrest]
@@ -209,3 +220,22 @@ theorem general_spectral_regularization_bound (mu : Nat) (spec : List Nat) :
 
 -- ----------------------------------------------------------------------------
 -- 6. UNIFIED UNIVERSAL QUOTIENT MASTER THEOREM FOR ALL n >= 7
+-- ----------------------------------------------------------------------------
+theorem universalQuotientMasterTheoremForAllN
+    (h_es_base : ∀ n : Nat, 7 ≤ n → ¬ IsErdosStrausCriticalResidue n → HasErdosStraus n)
+    (h_col_base : ∀ n : Nat, 2 ≤ n → ¬ IsCollatzCriticalResidue32 n → HasCollatzDescent n) :
+    (∀ n : Nat, 7 ≤ n →
+      (HasErdosStraus n ∨ IsErdosStrausCriticalResidue n) ∧
+      (HasCollatzDescent n ∨ IsCollatzCriticalResidue32 n)) ∧
+    (∀ p a : Nat, 2 ≤ p →
+      (p - 1) * sigmaPrimePower p a = p ^ (a + 1) - 1) ∧
+    (∀ (q b : Nat) (W : List (Nat × Nat)), 2 ≤ q → ValidWheel W →
+      wheelSigma W * wheelValue ((q, b) :: W) < wheelSigma ((q, b) :: W) * wheelValue W) ∧
+    (¬ SatisfiesRobinThreshold wheel5040 3817 1000 ∧
+       SatisfiesRobinThreshold wheel10080 3952 1000) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro n hn
+    refine ⟨?_, ?_⟩
+    · by_cases hes : IsErdosStrausCriticalResidue n
+      · exact Or.inr hes
+      · exact Or.inl (h_es_base n hn hes)
