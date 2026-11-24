@@ -27,11 +27,12 @@ jobs:
             python3 scripts/generate_master_lean.py
           fi
 
-      - name: Download & Extract Pure Lean 4 (v4.14.0)
+      - name: Install Elan & Lean 4 (v4.14.0)
         run: |
-          curl -fL "https://github.com" -o lean4.tar.zst
-          tar --use-compress-program=unzstd -xf lean4.tar.zst
-          echo "$PWD/lean-4.14.0-linux/bin" >> $GITHUB_PATH
+          curl -fL "https://github.com" -o elan.tar.gz
+          tar -xzf elan.tar.gz
+          ./elan-init -y --default-toolchain leanprover/lean4:v4.14.0
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
 
       - name: Verify Lean 4 version
         run: lean --version
