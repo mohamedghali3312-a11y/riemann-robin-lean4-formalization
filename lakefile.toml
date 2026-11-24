@@ -1,0 +1,29 @@
+name = "universal-quotient-master-theorem"
+version = "2.0.0"
+defaultTargets = ["UniversalMasterPure"]
+
+[[lean_lib]]
+name = "UniversalMasterPure"
+srcDir = "theorems"
+globs = [
+  "UniversalMasterTheorem",
+  "RobinWeightedWheelsGenerated",
+  "SierpinskiConjecture",
+  "LehmerTotientConjecture",
+  "SendovConjecture",
+  "GeneralizedCollatz3xPlusD",
+  "WieferichWallSunSun"
+]
+
+[[lean_lib]]
+name = "UniversalMasterBridge"
+srcDir = "theorems/bridge"
+globs = [
+  "RiemannAnalyticBridge",
+  "RiemannSpectralBridge"
+]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com"
+rev = "v4.14.0"
