@@ -43,7 +43,16 @@ jobs:
             echo "===================================================="
             echo "Verifying Pure Lean 4 module: $f"
             echo "===================================================="
+                        set +e
             OUTPUT=$(lean "$f" 2>&1)
+            STATUS=$?
+            set -e
+            echo "$OUTPUT"
+            if [ $STATUS -ne 0 ]; then
+              echo "ERROR: Lean compilation failed on $f!"
+              exit 1
+            fi
+
             echo "$OUTPUT"
 
             if echo "$OUTPUT" | grep -q "sorryAx"; then
