@@ -20,6 +20,7 @@ jobs:
         uses: leanprover/lean-action@v1
         with:
           build: false
+          lake-manifest: false
 
       - name: Set up Python 3
         uses: actions/setup-python@v5
