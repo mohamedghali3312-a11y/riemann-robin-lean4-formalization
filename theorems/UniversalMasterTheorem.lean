@@ -1,11 +1,8 @@
 -- ============================================================================
 -- UNIVERSAL QUOTIENT MASTER THEOREM FOR ALL n >= 7 (PURE LEAN 4)
--- Covers: Erdős–Straus (99.29%), Collatz (90.23%), Guy Robin Weighted Wheels,
---         CRT Divisor Multiplicativity & Finite Spectral Determinants
 -- Author: Mohamed Ghali (ORCID: 0009-0006-3364-5341)
 -- ============================================================================
 
--- Helper 100% Pure Lean 4 : 1 ≤ p ^ a dès que 1 ≤ p
 theorem pure_one_le_pow (a p : Nat) (hp : 1 ≤ p) : 1 ≤ p ^ a := by
   induction a with
   | zero => simp only [Nat.pow_zero, Nat.le_refl]
@@ -13,9 +10,6 @@ theorem pure_one_le_pow (a p : Nat) (hp : 1 ≤ p) : 1 ≤ p ^ a := by
     rw [Nat.pow_succ]
     exact Nat.mul_pos ih hp
 
--- ----------------------------------------------------------------------------
--- 1. ERDŐS–STRAUS & COLLATZ DEFINITIONS
--- ----------------------------------------------------------------------------
 def HasErdosStraus (n : Nat) : Prop :=
   ∃ x y z : Nat, 0 < x ∧ 0 < y ∧ 0 < z ∧
     4 * x * y * z = n * (y * z + x * z + x * y)
@@ -37,9 +31,6 @@ def HasCollatzDescent (n : Nat) : Prop :=
 def IsCollatzCriticalResidue32 (n : Nat) : Prop :=
   n % 32 = 7 ∨ n % 32 = 15 ∨ n % 32 = 27 ∨ n % 32 = 31
 
--- ----------------------------------------------------------------------------
--- 2. PRIMARY DIVISOR CLOSED FORM & STRICT ABUNDANCE GROWTH (BRICKS 1 & 2)
--- ----------------------------------------------------------------------------
 def sigmaPrimePower (p : Nat) : Nat → Nat
   | 0 => 1
   | a + 1 => sigmaPrimePower p a + p ^ (a + 1)
@@ -61,7 +52,7 @@ theorem sigma_prime_power_closed_form (p a : Nat) (hp : 2 ≤ p) :
     have h_pow_pos : 1 ≤ p ^ (k + 1) := pure_one_le_pow (k + 1) p (by omega)
     have h_tele : (p - 1) * p ^ (k + 1) + p ^ (k + 1) = p * p ^ (k + 1) :=
       sub_one_mul_add_self p (p ^ (k + 1)) (by omega)
-        have h_idx : k + 1 + 1 = k + 2 := by omega
+    have h_idx : k + 1 + 1 = k + 2 := by omega
     have h_pow_succ : p ^ (k + 2) = p * p ^ (k + 1) := by
       rw [← h_idx, Nat.pow_succ, Nat.mul_comm]
     have h_sub_eq : (p - 1) * p ^ (k + 1) = p ^ (k + 2) - p ^ (k + 1) := by omega
@@ -78,30 +69,14 @@ theorem abundanceFactorStrictGrowth (p a : Nat) (hp : 2 ≤ p) :
     | succ k => simp only [Nat.succ_sub_one, Nat.mul_succ]
   omega
 
-theorem sigma_prime_power_closed_form (p a : Nat) (hp : 2 ≤ p) :
-    (p - 1) * sigmaPrimePower p a = p ^ (a + 1) - 1 := by
-  induction a with
-  | zero =>
-    simp only [sigmaPrimePower, Nat.mul_one, Nat.zero_add, Nat.pow_one]
-  | succ k ih =>
-    dsimp only [sigmaPrimePower]
-    rw [Nat.mul_add, ih]
-    have h_pow_pos : 1 ≤ p ^ (k + 1) := pure_one_le_pow (k + 1) p (by omega)
-    have h_tele : (p - 1) * p ^ (k + 1) + p ^ (k + 1) = p * p ^ (k + 1) :=
-      sub_one_mul_add_self p (p ^ (k + 1)) (by omega)
-    have h_pow_succ : p ^ (k + 2) = p * p ^ (k + 1) := by
-      rw [Nat.pow_succ, Nat.mul_comm]
-    have h_sub_eq : (p - 1) * p ^ (k + 1) = p ^ (k + 2) - p ^ (k + 1) := by omega
-    rw [h_sub_eq]
+theorem sigma_prime_power_exceeds_self (p a : Nat) (hp : 2 ≤ p) :
+    p ^ a < sigmaPrimePower p a := by
+  have h_closed := sigma_prime_power_closed_form p a hp
+  have h_growth := abundanceFactorStrictGrowth p a hp
+  have h_comm : (p - 1) * p ^ a < (p - 1) * sigmaPrimePower p a := by
+    rw [Nat.mul_comm (p - 1) (p ^ a)]
     omega
-
   exact Nat.lt_of_mul_lt_mul_left h_comm
-
--- ----------------------------------------------------------------------------
--- 3. ARBITRARY ROBIN WEIGHTED WHEELS & PHASE TRANSITION (BRICKS 3 & 4)
--- ----------------------------------------------------------------------------
-theorem robinWeightedWheelDiv (V1 V2 k : Nat) (h_div : V2 = k * V1) :
-    V1 ∣ V2 := ⟨k, by rw [h_div, Nat.mul_comm]⟩
 
 def wheelValue : List (Nat × Nat) → Nat
   | [] => 1
@@ -164,58 +139,6 @@ theorem robin_5040_is_counterexample :
 theorem robin_10080_satisfies_robin :
     SatisfiesRobinThreshold wheel10080 3952 1000 := by decide
 
--- ----------------------------------------------------------------------------
--- 4. RAW DIVISOR SUM BRIDGE (`rawSigma` <-> `wheelSigma`)
--- ----------------------------------------------------------------------------
-def rawSigma (n : Nat) : Nat :=
-  (List.range n).foldl (fun acc k =>
-    let d := k + 1
-    if n % d = 0 then acc + d else acc) 0
-
-def IsPurePrime (p : Nat) : Prop :=
-  2 ≤ p ∧ ∀ d : Nat, 1 ≤ d → d ≤ p → p % d = 0 → d = 1 ∨ d = p
-
-def IsPureCoprime (a b : Nat) : Prop :=
-  Nat.gcd a b = 1
-
-def ValidPrimeWheel : List (Nat × Nat) → Prop
-  | [] => True
-  | (p, a) :: rest =>
-    IsPurePrime p ∧ IsPureCoprime (p ^ a) (wheelValue rest) ∧ ValidPrimeWheel rest
-
-theorem rawSigma_eq_wheelSigma
-    (h_coprime_mul : ∀ A B : Nat, 1 ≤ A → 1 ≤ B → IsPureCoprime A B →
-      rawSigma (A * B) = rawSigma A * rawSigma B)
-    (h_prime_pow : ∀ p a : Nat, IsPurePrime p →
-      rawSigma (p ^ a) = sigmaPrimePower p a)
-    (W : List (Nat × Nat)) (hW : ValidPrimeWheel W) :
-    rawSigma (wheelValue W) = wheelSigma W := by
-  induction W with
-  | nil =>
-    dsimp only [wheelValue, wheelSigma]
-    decide
-  | cons hd rest ih =>
-    rcases hd with ⟨p, a⟩
-    dsimp only [ValidPrimeWheel] at hW
-    rcases hW with ⟨hp_prime, h_cop, hrest⟩
-    dsimp only [wheelValue, wheelSigma]
-    have hpa_pos : 1 ≤ p ^ a := pure_one_le_pow a p (by have := hp_prime.1; omega)
-    have hrest_pos : 1 ≤ wheelValue rest := by
-      clear ih h_cop
-      induction rest with
-      | nil => simp only [wheelValue, Nat.le_refl]
-      | cons hd2 r2 ihr2 =>
-        rcases hd2 with ⟨q, b⟩
-        dsimp only [ValidPrimeWheel] at hrest
-        dsimp only [wheelValue]
-        have hqb : 1 ≤ q ^ b := pure_one_le_pow b q (by have := hrest.1.1; omega)
-        exact Nat.mul_pos hqb (ihr2 hrest.2.2)
-    rw [h_coprime_mul (p ^ a) (wheelValue rest) hpa_pos hrest_pos h_cop]
-    rw [h_prime_pow p a hp_prime, ih hrest]
-
--- ----------------------------------------------------------------------------
--- 5. FINITE SPECTRAL REGULARIZED DETERMINANT BOUND (BRICK 16)
--- ----------------------------------------------------------------------------
 def regularizedSpectralDet (mu : Nat) : List Nat → Nat
   | [] => 1
   | lam :: rest => (lam + mu) * regularizedSpectralDet mu rest
@@ -231,9 +154,6 @@ theorem general_spectral_regularization_bound (mu : Nat) (spec : List Nat) :
     have h1 : mu ≤ lam + mu := by omega
     exact Nat.mul_le_mul h1 ih
 
--- ----------------------------------------------------------------------------
--- 6. UNIFIED UNIVERSAL QUOTIENT MASTER THEOREM FOR ALL n >= 7
--- ----------------------------------------------------------------------------
 theorem universalQuotientMasterTheoremForAllN
     (h_es_base : ∀ n : Nat, 7 ≤ n → ¬ IsErdosStrausCriticalResidue n → HasErdosStraus n)
     (h_col_base : ∀ n : Nat, 2 ≤ n → ¬ IsCollatzCriticalResidue32 n → HasCollatzDescent n) :
@@ -246,8 +166,7 @@ theorem universalQuotientMasterTheoremForAllN
       wheelSigma W * wheelValue ((q, b) :: W) < wheelSigma ((q, b) :: W) * wheelValue W) ∧
     (¬ SatisfiesRobinThreshold wheel5040 3817 1000 ∧
        SatisfiesRobinThreshold wheel10080 3952 1000) := by
-    refine ⟨?_, ?_, ?_, ⟨?_, ?_⟩⟩
-
+  refine ⟨?_, ?_, ?_, ⟨?_, ?_⟩⟩
   · intro n hn
     refine ⟨?_, ?_⟩
     · by_cases hes : IsErdosStrausCriticalResidue n
@@ -267,6 +186,5 @@ theorem universalQuotientMasterTheoremForAllN
 #print axioms robin_general_wheel_step_increase
 #print axioms robin_5040_is_counterexample
 #print axioms robin_10080_satisfies_robin
-#print axioms rawSigma_eq_wheelSigma
 #print axioms general_spectral_regularization_bound
 #print axioms universalQuotientMasterTheoremForAllN
