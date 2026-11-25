@@ -47,15 +47,13 @@ theorem wieferich_iff_fermat_quotient_zero (a p : Nat) (hp : 2 ≤ p)
     simp only [Nat.sub_self, Nat.zero_div]
   · intro h_q_zero
     refine ⟨hp, ?_⟩
-    let r := powMod a (p - 1) (p * p)
+    generalize hr : powMod a (p - 1) (p * p) = r at *
     have h_dm := Nat.div_add_mod r p
-    have h_flt' : r % p = 1 := h_flt
-    rw [h_flt'] at h_dm
+    rw [h_flt] at h_dm
     have h_sub_div : (r - 1) / p = r / p := by
       have h_eq : r - 1 = p * (r / p) := by omega
       rw [h_eq, Nat.mul_div_cancel_left _ (by omega)]
-    have h_q' : (r - 1) / p = 0 := h_q_zero
-    rw [h_sub_div] at h_q'
+    rw [h_sub_div] at h_q_zero
     omega
 
 theorem wieferich1093Certified : IsWieferichBase 2 1093 := by
