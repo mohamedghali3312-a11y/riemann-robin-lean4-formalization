@@ -111,13 +111,59 @@ def isOnlyKnownWieferich (n : Nat) : Bool :=
     (n == 1093) || (n == 3511)
   else
     true
-
+set_option maxRecDepth 2000000 in
 theorem wieferich_search_2_to_1200 :
     (List.range 1199).all (fun k => isOnlyKnownWieferich (k + 2)) = true := by
   decide
 
+set_option maxRecDepth 2000000 in
 theorem wieferich_search_1201_to_2400 :
     (List.range 1200).all (fun k => isOnlyKnownWieferich (k + 1201)) = true := by
+  decide
+
+set_option maxRecDepth 2000000 in
+theorem wieferich_search_2401_to_3600 :
+    (List.range 1200).all (fun k => isOnlyKnownWieferich (k + 2401)) = true := by
+  decide
+set_option maxRecDepth 2000000 in
+theorem wieferich_search_2_to_1200 :
+    (List.range 1199).all (fun k => isOnlyKnownWieferich (k + 2)) = true := by
+  decide
+
+theorem wieferich_search_2_to_1200 :
+    (List.range 1199).all (fun k => isOnlyKnownWieferich (k + 2)) = true := by
+  decide
+set_option maxRecDepth 2000000 in
+theorem wieferich_search_2_to_1200 :
+    (List.range 1199).all (fun k => isOnlyKnownWieferich (k + 2)) = true := by
+  decide
+
+set_option maxRecDepth 2000000 in
+theorem wieferich_search_1201_to_2400 :
+    (List.range 1200).all (fun k => isOnlyKnownWieferich (k + 1201)) = true := by
+  decide
+
+set_option maxRecDepth 2000000 in
+theorem wieferich_search_2401_to_3600 :
+    (List.range 1200).all (fun k => isOnlyKnownWieferich (k + 2401)) = true := by
+  decide
+
+theorem wieferich_search_1201_to_2400 :
+    (List.range 1200).all (fun k => isOnlyKnownWieferich (k + 1201)) = true := by
+  decide
+set_option maxRecDepth 2000000 in
+theorem wieferich_search_2_to_1200 :
+    (List.range 1199).all (fun k => isOnlyKnownWieferich (k + 2)) = true := by
+  decide
+
+set_option maxRecDepth 2000000 in
+theorem wieferich_search_1201_to_2400 :
+    (List.range 1200).all (fun k => isOnlyKnownWieferich (k + 1201)) = true := by
+  decide
+
+set_option maxRecDepth 2000000 in
+theorem wieferich_search_2401_to_3600 :
+    (List.range 1200).all (fun k => isOnlyKnownWieferich (k + 2401)) = true := by
   decide
 
 theorem wieferich_search_2401_to_3600 :
