@@ -55,7 +55,7 @@ theorem wieferich_iff_fermat_quotient_zero (a p : Nat) (hp : 2 ≤ p)
       rw [h_eq, Nat.mul_div_cancel_left _ (by omega)]
     rw [h_sub_div] at h_q_zero
     rw [h_q_zero, Nat.mul_zero, Nat.zero_add] at h_dm
-    exact h_dm
+    exact h_dm.symm
 
 theorem wieferich1093Certified : IsWieferichBase 2 1093 := by
   refine ⟨by omega, ?_⟩
