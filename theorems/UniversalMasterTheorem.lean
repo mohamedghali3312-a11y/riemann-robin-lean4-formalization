@@ -150,11 +150,14 @@ def SatisfiesRobinThreshold (W : List (Nat × Nat)) (thresholdNum : Nat) : Prop 
 
 theorem robin_5040_is_counterexample :
     ¬ SatisfiesRobinThreshold wheel5040 3817 := by
-  decide
+  dsimp only [SatisfiesRobinThreshold, wheel5040, wheelSigma, wheelValue, sigmaPrimePower]
+  omega
 
 theorem robin_10080_satisfies_robin :
     SatisfiesRobinThreshold wheel10080 3952 := by
-  decide
+  dsimp only [SatisfiesRobinThreshold, wheel10080, wheelSigma, wheelValue, sigmaPrimePower]
+  omega
+
 
 def regularizedSpectralDet (mu : Nat) : List Nat → Nat
   | [] => 1
