@@ -41,23 +41,7 @@ theorem sub_one_mul_add_self (p x : Nat) (hp : 1 ≤ p) :
   | zero => omega
   | succ k => simp only [Nat.succ_sub_one, Nat.succ_mul]
 
-theorem sigma_prime_power_closed_form (p a : Nat) (hp : 2 ≤ p) :
-    (p - 1) * sigmaPrimePower p a = p ^ (a + 1) - 1 := by
-  induction a with
-  | zero =>
-    simp only [sigmaPrimePower, Nat.mul_one, Nat.zero_add, Nat.pow_one]
-  | succ k ih =>
-    dsimp only [sigmaPrimePower]
-    rw [Nat.mul_add, ih]
-    have h_pow_pos : 1 ≤ p ^ (k + 1) := pure_one_le_pow (k + 1) p (by omega)
-    have h_tele : (p - 1) * p ^ (k + 1) + p ^ (k + 1) = p * p ^ (k + 1) :=
-      sub_one_mul_add_self p (p ^ (k + 1)) (by omega)
-    have h_idx : k + 1 + 1 = k + 2 := by omega
-    have h_pow_succ : p ^ (k + 2) = p * p ^ (k + 1) := by
-      rw [← h_idx, Nat.pow_succ, Nat.mul_comm]
-    have h_sub_eq : (p - 1) * p ^ (k + 1) = p ^ (k + 2) - p ^ (k + 1) := by omega
-    rw [h_sub_eq]
-    omega
+
 
 theorem abundanceFactorStrictGrowth (p a : Nat) (hp : 2 ≤ p) :
     p ^ a * (p - 1) < p ^ (a + 1) - 1 := by
