@@ -22,11 +22,12 @@ def IsWieferichBase (a p : Nat) : Prop :=
 def fermatQuotientModP (a p : Nat) : Nat :=
   ((powMod a (p - 1) (p * p)) - 1) / p
 
-def lucasFibMod : Nat → Nat → Nat × Nat
-  | 0, _ => (0, 1)
-  | n + 1, m =>
-    let (a, b) := lucasFibMod n m
-    (b % m, (a + b) % m)
+def lucasFibModAux : Nat → Nat → Nat → Nat → Nat
+  | 0, a, _, _ => a
+  | n + 1, a, b, m => lucasFibModAux n (b % m) ((a + b) % m) m
+
+def lucasFibMod (n m : Nat) : Nat × Nat :=
+  (lucasFibModAux n 0 1 m, lucasFibModAux (n + 1) 0 1 m)
 
 def IsWallSunSunPrime (p : Nat) : Prop :=
   5 ≤ p ∧ (lucasFibMod (p - 1) (p * p)).1 = 0 ∧ (lucasFibMod (p + 1) (p * p)).1 = 0
@@ -69,6 +70,7 @@ theorem mirimanoff11Certified : IsWieferichBase 3 11 := by
   refine ⟨by omega, ?_⟩
   decide
 
+set_option maxRecDepth 2000000 in
 theorem nonWallSunSun997Certified : ¬ IsWallSunSunPrime 997 := by
   intro h
   rcases h with ⟨_, h1, _⟩
